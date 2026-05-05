@@ -575,40 +575,44 @@ export default function ClientHome() {
                     {p.startingPrice > 0 ? `From SAR ${p.startingPrice}` : 'Ask for price'}
                   </span>
 
-                  <button
-                    className="btn btn-primary btn-pill btn-sm"
-                    onClick={e => {
-                      e.stopPropagation();
+                  <div className="provider-row-action-buttons">
+                    <button
+                      type="button"
+                      className={`provider-row-fav-inline${isFav ? ' fav-active' : ''}`}
+                      onClick={e => {
+                        e.stopPropagation();
 
-                      if (!user) {
-                        showSignInRequired();
-                        return;
-                      }
+                        if (!user) {
+                          showSignInRequired();
+                          return;
+                        }
 
-                      navigate(`/client/book?providerId=${p.id}`);
-                    }}
-                  >
-                    Book
-                  </button>
+                        toggleFav(e, p.id);
+                      }}
+                      title={isFav ? 'Remove from favourites' : 'Add to favourites'}
+                      aria-label={isFav ? 'Remove from favourites' : 'Add to favourites'}
+                    >
+                      <Icon name={isFav ? 'heartFilled' : 'heart'} size="1rem" />
+                    </button>
+
+                    <button
+                      type="button"
+                      className="btn btn-primary btn-pill btn-sm"
+                      onClick={e => {
+                        e.stopPropagation();
+
+                        if (!user) {
+                          showSignInRequired();
+                          return;
+                        }
+
+                        navigate(`/client/book?providerId=${p.id}`);
+                      }}
+                    >
+                      Book
+                    </button>
+                  </div>
                 </div>
-
-                <button
-                  className={`provider-row-fav${isFav ? ' fav-active' : ''}`}
-                  onClick={e => {
-                    e.stopPropagation();
-
-                    if (!user) {
-                      showSignInRequired();
-                      return;
-                    }
-
-                    toggleFav(e, p.id);
-                  }}
-                  title={isFav ? 'Remove from favourites' : 'Add to favourites'}
-                  aria-label={isFav ? 'Remove from favourites' : 'Add to favourites'}
-                >
-                  <Icon name={isFav ? 'heartFilled' : 'heart'} size="1rem" />
-                </button>
               </article>
             );
           })}
