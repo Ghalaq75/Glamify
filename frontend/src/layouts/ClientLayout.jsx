@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import Footer from '../components/Footer';
 import Icon from '../components/Icon';
+import { useAuth } from '../context/AuthContext';
 import useSidebarToggle from '../hooks/useSidebarToggle';
 
 const NAV = [
@@ -12,9 +12,13 @@ const NAV = [
   { path: '/client/profile', label: 'Profile', icon: 'user' },
 ];
 
+const PUBLIC_NAV = [
+  { path: '/', label: 'Discover', icon: 'home' },
+];
+
 export function ClientLayout({ children }) {
   const { pathname } = useLocation();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const navigate = useNavigate();
   const [collapsed, toggleSidebar] = useSidebarToggle();
 
@@ -22,6 +26,8 @@ export function ClientLayout({ children }) {
     logout();
     navigate('/login');
   }
+
+  const navItems = user ? NAV : PUBLIC_NAV;
 
   return (
     <div className="client-with-footer">
@@ -40,22 +46,28 @@ export function ClientLayout({ children }) {
             <span>Glamify</span>
             <p className="sidebar-logo-sub">Beauty at your Doorstep</p>
           </div>
-          {NAV.map(n => (
+          {navItems.map(n => (
             <Link key={n.path} to={n.path} className={`nav-item${pathname === n.path ? ' active' : ''}`}>
               <Icon name={n.icon} size="1.05rem" /> {n.label}
             </Link>
           ))}
           <div style={{ marginTop: 'auto', padding: '0 0.5rem' }}>
-            <button className="nav-item btn-ghost" style={{ width: '100%', border: 'none' }} onClick={handleLogout}>
-              <Icon name="doorOpen" size="1.05rem" /> Sign Out
-            </button>
+            {user ? (
+              <button className="nav-item btn-ghost" style={{ width: '100%', border: 'none' }} onClick={handleLogout}>
+                <Icon name="doorOpen" size="1.05rem" /> Sign Out
+              </button>
+            ) : (
+              <Link to="/login" className="nav-item">
+                <Icon name="doorOpen" size="1.05rem" /> Sign In
+              </Link>
+            )}
           </div>
         </nav>
         <main className="content-area">
           {children}
         </main>
         <nav className="mobile-nav">
-          {NAV.map(n => (
+          {navItems.map(n => (
             <Link key={n.path} to={n.path} className={`mobile-nav-item${pathname === n.path ? ' active' : ''}`}>
               <Icon name={n.icon} size="1.25rem" />
               <span>{n.label}</span>

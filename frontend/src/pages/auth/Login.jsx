@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { AuthLayout } from '../../layouts/AuthLayout';
-import { useAuth } from '../../context/AuthContext';
-import { api } from '../../utils/api';
-import { PasswordInput } from '../../components/PasswordInput';
+import { Link, useNavigate } from 'react-router-dom';
 import Icon from '../../components/Icon';
+import { PasswordInput } from '../../components/PasswordInput';
+import { useAuth } from '../../context/AuthContext';
+import { AuthLayout } from '../../layouts/AuthLayout';
+import { api } from '../../utils/api';
 
 const ROLES = [
   { value: 'client',   label: 'Client' },
@@ -41,6 +41,10 @@ export default function Login() {
 
   return (
     <AuthLayout>
+
+      <Link to="/" style={{ position: 'fixed', top: '1.5rem', left: '1.75rem', color: 'rgba(255,255,255,0.85)', fontSize: '0.8rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.4rem', letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: 'Jost, sans-serif', fontWeight: 500, zIndex: 100 }}>
+        ← Back
+      </Link>
       <p className="auth-eyebrow">Welcome back</p>
       <h1 className="auth-dark-heading">Sign in</h1>
 

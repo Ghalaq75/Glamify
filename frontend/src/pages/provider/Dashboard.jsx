@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../../utils/api';
-import { useAuth } from '../../context/AuthContext';
-import { useToast } from '../../components/Toast';
 import Icon from '../../components/Icon';
+import { useToast } from '../../components/Toast';
+import { useAuth } from '../../context/AuthContext';
+import { api } from '../../utils/api';
 
 const STATUS_BADGE = { pending: 'badge-warning', confirmed: 'badge-success', completed: 'badge-muted', cancelled: 'badge-error' };
 
@@ -34,18 +34,23 @@ export default function ProviderDashboard() {
   return (
     <div>
       <div style={{ marginBottom: '2rem' }}>
-        <h1 className="page-title">Provider Dashboard</h1>
+        <span className="kicker">Overview</span>
+        <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '2rem', marginTop: '0.25rem' }}>Provider Dashboard</h1>
         <p className="text-muted text-sm">Welcome back, {user?.name?.split(' ')[0]}!</p>
       </div>
 
-      <div className="grid-4" style={{ marginBottom: '2rem' }}>
-        <div className="stat-card"><div className="stat-value">{data?.pendingCount ?? 0}</div><div className="stat-label">Pending</div></div>
-        <div className="stat-card"><div className="stat-value">{data?.confirmedTodayCount ?? 0}</div><div className="stat-label">Today</div></div>
-        <div className="stat-card"><div className="stat-value">{data?.completedAllTime ?? 0}</div><div className="stat-label">Completed</div></div>
-        <div className="stat-card">
-          <div className="stat-value" style={{ fontSize: '1.4rem' }}>SAR {Math.round(data?.totalEarningsThisMonth ?? 0)}</div>
-          <div className="stat-label">This Month</div>
-        </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1px', background: 'var(--color-border)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', overflow: 'hidden', marginBottom: '2.5rem' }}>
+        {[
+          { label: 'Pending', value: data?.pendingCount ?? 0 },
+          { label: 'Today', value: data?.confirmedTodayCount ?? 0 },
+          { label: 'Completed', value: data?.completedAllTime ?? 0 },
+          { label: 'This Month', value: `SAR ${Math.round(data?.totalEarningsThisMonth ?? 0)}` },
+        ].map(s => (
+          <div key={s.label} style={{ background: 'var(--color-bg)', padding: '2rem 1.5rem', textAlign: 'center' }}>
+            <div style={{ fontFamily: 'var(--font-serif)', fontSize: '2.5rem', fontWeight: 400, color: 'var(--color-primary)', lineHeight: 1 }}>{s.value}</div>
+            <div style={{ fontSize: '0.65rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--color-text-muted)', marginTop: '0.75rem', fontFamily: 'Jost, sans-serif' }}>{s.label}</div>
+          </div>
+        ))}
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>

@@ -1,3 +1,5 @@
+const twilio = require('twilio');
+
 function formatDate(dateStr) {
   const [year, month, day] = dateStr.split('-');
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -17,10 +19,30 @@ function buildMessage({ recipientName, serviceName, providerName, date, timeSlot
   return msg;
 }
 
+function isConfigured() {
+  return !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_WHATSAPP_FROM);
+}
+
 async function sendGiftNotification(params) {
   const body = buildMessage(params);
   const to = params.recipientPhone.trim();
-  console.info('[SIMULATED] Gift notification to', to, ':', body);
+
+  if (!isConfigured()) {
+    console.info('[SIMULATED] Gift WhatsApp notification to', to, ':', body);
+    return;
+  }
+
+  try {
+    const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+    await client.messages.create({
+      from: process.env.TWILIO_WHATSAPP_FROM,
+      to: `whatsapp:${to}`,
+      body,
+    });
+    console.info('[WhatsApp] Gift notification sent to', to);
+  } catch (err) {
+    console.error('[WhatsApp] Failed to send gift notification:', err.message);
+  }
 }
 
 module.exports = { sendGiftNotification };

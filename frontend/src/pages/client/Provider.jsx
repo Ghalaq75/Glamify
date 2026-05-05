@@ -1,20 +1,20 @@
-import { useState, useEffect, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { api } from '../../utils/api';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import Icon from '../../components/Icon';
 import ProviderLogo from '../../components/ProviderLogo';
 import { useToast } from '../../components/Toast';
+import { api } from '../../utils/api';
 import {
-  getCurrentPosition,
-  haversineDistance,
   formatDistance,
-  isWithinRiyadh,
-  getSessionClientCoords,
-  setSessionClientCoords,
-  isNearMeActive,
-  setNearMeActive,
   GeolocationError,
+  getCurrentPosition,
+  getSessionClientCoords,
+  haversineDistance,
+  isNearMeActive,
+  isWithinRiyadh,
+  setNearMeActive,
+  setSessionClientCoords,
 } from '../../utils/geolocation';
-import Icon from '../../components/Icon';
 
 export default function ClientProvider() {
   const { providerId } = useParams();
@@ -26,8 +26,8 @@ export default function ClientProvider() {
   const [loading, setLoading] = useState(true);
   const [coords, setCoords] = useState(() => (isNearMeActive() ? getSessionClientCoords() : null));
   const [locating, setLocating] = useState(false);
-  const { error: toastError, success: toastSuccess } = useToast();
-
+const { error: toastError, success: toastSuccess } = useToast();
+  const { user } = useAuth();
   const distanceKm = useMemo(() => {
     if (!coords || !provider || typeof provider.latitude !== 'number' || typeof provider.longitude !== 'number') return null;
     return haversineDistance(coords.lat, coords.lng, provider.latitude, provider.longitude);
@@ -127,7 +127,7 @@ export default function ClientProvider() {
               </div>
             )}
           </div>
-          <button className="btn btn-primary" onClick={() => navigate(`/client/book?providerId=${provider.id}`)}>Book Appointment</button>
+          <button className="btn btn-primary" onClick={() => user ? navigate(`/client/book?providerId=${provider.id}`) : navigate('/login')}>Book Appointment</button>
         </div>
       </div>
 

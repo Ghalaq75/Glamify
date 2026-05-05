@@ -27,37 +27,65 @@ async function listProviders(req, res) {
     servicesByProvider[pid].push(s);
   });
 
+  const today = new Date().toISOString().split('T')[0];
+  const providerIds = approvedProviders.map(p => p._id);
+
+  const [availDocs, todayBookings] = await Promise.all([
+    Availability.find({ providerId: { $in: providerIds } }).lean(),
+    Booking.find({
+      providerId: { $in: providerIds },
+      date: today,
+      status: { $in: ['pending', 'confirmed', 'rescheduled'] },
+    }).lean(),
+  ]);
+
+  const availByProvider = {};
+  availDocs.forEach(a => { availByProvider[String(a.providerId)] = a; });
+  const todayBookingsByProvider = {};
+  todayBookings.forEach(b => {
+    const k = String(b.providerId);
+    if (!todayBookingsByProvider[k]) todayBookingsByProvider[k] = [];
+    todayBookingsByProvider[k].push(b);
+  });
+
+  const availableTodaySet = new Set(
+    providerIds.filter(pid => {
+      const slots = getBookableSlotsForDate({
+        availabilityDoc: availByProvider[String(pid)] || null,
+        bookings: todayBookingsByProvider[String(pid)] || [],
+        date: today,
+      });
+      return slots.length > 0;
+    }).map(String)
+  );
+
   let availableProviderIds = null;
-  if (date) {
-    const providerIds = approvedProviders.map(p => p._id);
-    const [availDocs, bookings] = await Promise.all([
-      Availability.find({ providerId: { $in: providerIds } }).lean(),
+  if (date && date !== today) {
+    const [dateBookings] = await Promise.all([
       Booking.find({
         providerId: { $in: providerIds },
         date,
         status: { $in: ['pending', 'confirmed', 'rescheduled'] },
       }).lean(),
     ]);
-    const availByProvider = {};
-    availDocs.forEach(a => { availByProvider[String(a.providerId)] = a; });
     const bookingsByProvider = {};
-    bookings.forEach(b => {
+    dateBookings.forEach(b => {
       const k = String(b.providerId);
       if (!bookingsByProvider[k]) bookingsByProvider[k] = [];
       bookingsByProvider[k].push(b);
     });
     availableProviderIds = new Set(
-      providerIds
-        .filter((pid) => {
-          const slots = getBookableSlotsForDate({
-            availabilityDoc: availByProvider[String(pid)] || null,
-            bookings: bookingsByProvider[String(pid)] || [],
-            date,
-          });
-          return slots.length > 0;
-        })
-        .map(String)
+      providerIds.filter(pid => {
+        const slots = getBookableSlotsForDate({
+          availabilityDoc: availByProvider[String(pid)] || null,
+          bookings: bookingsByProvider[String(pid)] || [],
+          date,
+        });
+        return slots.length > 0;
+      }).map(String)
     );
+  } else if (date === today) {
+    availableProviderIds = availableTodaySet;
   }
 
   let providerList = approvedProviders.map(p => {
@@ -80,7 +108,7 @@ async function listProviders(req, res) {
       latitude: p.latitude || null,
       longitude: p.longitude || null,
       startingPrice,
-      isAvailableToday: true,
+      isAvailableToday: availableTodaySet.has(String(p._id)),
     };
   });
 

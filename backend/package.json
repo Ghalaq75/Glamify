@@ -18,7 +18,8 @@
     "mongodb-memory-server": "^11.1.0",
     "mongoose": "^8.4.0",
     "morgan": "^1.10.0",
-    "stripe": "^22.1.0"
+    "stripe": "^22.1.0",
+    "twilio": "^6.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.3"

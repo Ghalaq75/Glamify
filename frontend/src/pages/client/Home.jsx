@@ -1,28 +1,28 @@
-import { useState, useEffect, useMemo } from 'react';
+import { DISTRICTS, IS_PLACEHOLDER_LIST } from '@workspace/riyadh-districts';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../../utils/api';
-import ProviderLogo from '../../components/ProviderLogo';
-import { useAuth } from '../../context/AuthContext';
-import { useToast } from '../../components/Toast';
-import {
-  getCurrentPosition,
-  haversineDistance,
-  formatDistance,
-  isWithinRiyadh,
-  getSessionClientCoords,
-  setSessionClientCoords,
-  clearSessionClientCoords,
-  isNearMeActive,
-  setNearMeActive,
-  GeolocationError,
-} from '../../utils/geolocation';
 import heroSpa from '../../assets/hero_spa_new.jpg';
 import spaFacial from '../../assets/spa_facial.jpg';
 import spaHair from '../../assets/spa_hair.jpg';
 import spaInterior from '../../assets/spa_interior.jpg';
 import Icon from '../../components/Icon';
+import ProviderLogo from '../../components/ProviderLogo';
 import TasselDrop from '../../components/TasselDrop';
-import { DISTRICTS, IS_PLACEHOLDER_LIST } from '@workspace/riyadh-districts';
+import { useToast } from '../../components/Toast';
+import { useAuth } from '../../context/AuthContext';
+import { api } from '../../utils/api';
+import {
+  clearSessionClientCoords,
+  formatDistance,
+  GeolocationError,
+  getCurrentPosition,
+  getSessionClientCoords,
+  haversineDistance,
+  isNearMeActive,
+  isWithinRiyadh,
+  setNearMeActive,
+  setSessionClientCoords,
+} from '../../utils/geolocation';
 
 const CATEGORIES = [
   { key: 'All', icon: 'sparkle' },
@@ -111,8 +111,10 @@ export default function ClientHome() {
   }, [category, search, searchDate]);
 
   useEffect(() => {
+  if (user) {
     api.get('/client/favourites').then(favs => setFavourites(favs.map(f => String(f.providerId)))).catch(() => {});
-  }, []);
+  }
+}, [user]);
 
   const visibleProviders = useMemo(() => {
     let list = providers;
@@ -457,14 +459,14 @@ export default function ClientHome() {
                   </span>
                   <button
                     className="btn btn-primary btn-pill btn-sm"
-                    onClick={e => { e.stopPropagation(); navigate(`/client/book?providerId=${p.id}`); }}
+                    onClick={e => { e.stopPropagation(); user ? navigate(`/client/book?providerId=${p.id}`) : navigate('/login'); }}
                   >
                     Book
                   </button>
                 </div>
                 <button
                   className={`provider-row-fav${isFav ? ' fav-active' : ''}`}
-                  onClick={e => toggleFav(e, p.id)}
+                  onClick={e => user ? toggleFav(e, p.id) : navigate('/login')}
                   title={isFav ? 'Remove from favourites' : 'Add to favourites'}
                   aria-label={isFav ? 'Remove from favourites' : 'Add to favourites'}
                 >
